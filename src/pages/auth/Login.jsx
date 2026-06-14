@@ -1,8 +1,10 @@
+// src/pages/Login.jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Mail, Lock, Eye, EyeOff, Zap } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Zap, ShieldCheck, UserCog, Users, User } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import toast from 'react-hot-toast'
+import loginImage from '@/assets/login-image.png'
 
 const DEMO_USERS = {
   super_admin: { name: 'Super Admin',  role: 'super_admin', email: 'superadmin@nexhr.com' },
@@ -12,18 +14,19 @@ const DEMO_USERS = {
 }
 
 const TABS = [
-  { key: 'super_admin', label: 'Super Admin', color: 'from-violet-500 to-purple-600' },
-  { key: 'admin',       label: 'Admin',       color: 'from-blue-500 to-cyan-500' },
-  { key: 'hr',          label: 'HR',          color: 'from-emerald-500 to-teal-500' },
-  { key: 'employee',    label: 'Employee',    color: 'from-pink-500 to-rose-500' },
+  { key: 'super_admin', label: 'Super Admin', icon: ShieldCheck, color: 'from-violet-500 to-purple-600', ring: 'ring-violet-300' },
+  { key: 'admin',       label: 'Admin',       icon: UserCog,     color: 'from-blue-500 to-cyan-500',     ring: 'ring-blue-300' },
+  { key: 'hr',          label: 'HR',          icon: Users,       color: 'from-emerald-500 to-teal-500',  ring: 'ring-emerald-300' },
+  { key: 'employee',    label: 'Employee',    icon: User,        color: 'from-pink-500 to-rose-500',     ring: 'ring-pink-300' },
 ]
 
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [role, setRole]       = useState('hr')
+  const [role, setRole] = useState('hr')
   const [showPass, setShowPass] = useState(false)
-  const [loading, setLoading]   = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [remember, setRemember] = useState(true)
   const [form, setForm] = useState({ email: '', password: '' })
 
   const handleLogin = async (e) => {
@@ -39,136 +42,192 @@ export default function Login() {
   const activeTab = TABS.find(t => t.key === role)
 
   return (
-    <div className="w-full max-w-4xl flex rounded-2xl overflow-hidden shadow-2xl">
-      {/* Left Panel */}
-      <div className="hidden md:flex flex-col w-[420px] bg-gradient-to-br from-[#0f1117] to-[#1a1d27] p-10 relative overflow-hidden">
-        {/* Decorative blobs */}
-        <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl"/>
-        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-accent-purple/20 rounded-full blur-3xl"/>
+    <div className="min-h-screen flex bg-slate-100">
 
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-12 relative z-10">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent-teal flex items-center justify-center">
-            <span className="text-white font-800 text-lg">N</span>
-          </div>
-          <div>
-            <p className="text-white font-800 text-xl leading-none">NexHR</p>
-            <p className="text-slate-400 text-xs mt-0.5">Enterprise HRMS</p>
-          </div>
-        </div>
+      {/* Left Image Section */}
+      <div className="hidden lg:block lg:w-[55%] relative overflow-hidden">
+        <img src={loginImage} alt="NexHR" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1f2b44]/90 via-[#1f2b44]/70 to-transparent" />
 
-        <div className="relative z-10 flex-1">
-          <h2 className="text-white font-800 text-3xl leading-tight mb-3">
-            People-first HR,<br/>built for scale
-          </h2>
-          <p className="text-slate-400 text-sm leading-relaxed mb-8">
-            Manage your entire workforce lifecycle from one unified, intelligent platform.
+        <div className="absolute bottom-12 left-12 max-w-xl text-white">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <span className="font-extrabold text-2xl">N</span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-extrabold">NexHR</h2>
+              <p className="text-slate-300 text-sm">Enterprise HR Management Platform</p>
+            </div>
+          </div>
+
+          <h1 className="text-5xl font-extrabold leading-tight mb-5">
+            Manage People.<br />Drive Growth.
+          </h1>
+
+          <p className="text-lg text-slate-200 leading-relaxed mb-10">
+            One unified platform for HR, Attendance, Payroll, Recruitment,
+            Performance and Employee Experience.
           </p>
 
-          {/* Feature chips */}
-          <div className="flex flex-wrap gap-2 mb-10">
-            {['Payroll','Attendance','Recruitment','Performance','LMS','Analytics','Onboarding','Helpdesk'].map(f => (
-              <span key={f} className="px-3 py-1 rounded-full text-xs font-600 bg-white/10 text-slate-300 border border-white/10">
-                {f}
-              </span>
-            ))}
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            {[['16+','Modules'],['99.9%','Uptime'],['10k+','Employees']].map(([v,l]) => (
-              <div key={l} className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
-                <p className="text-white font-800 text-lg leading-none">{v}</p>
-                <p className="text-slate-400 text-xs mt-1">{l}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <p className="text-3xl font-extrabold">10K+</p>
+              <p className="text-slate-300 text-sm">Employees</p>
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold">99.9%</p>
+              <p className="text-slate-300 text-sm">Uptime</p>
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold">16+</p>
+              <p className="text-slate-300 text-sm">Modules</p>
+            </div>
           </div>
         </div>
-
-        <p className="text-slate-600 text-xs relative z-10 mt-6">© 2026 NexHR. All rights reserved.</p>
       </div>
 
-      {/* Right Panel */}
-      <div className="flex-1 bg-white p-8 flex flex-col justify-center">
-        <div className="max-w-sm mx-auto w-full">
-          <h3 className="text-xl font-800 text-text-primary mb-1">Welcome back</h3>
-          <p className="text-sm text-text-secondary mb-6">Sign in to your workspace</p>
+      {/* Right Login Section */}
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-[#1f2b44] via-[#1b2740] to-[#162033] p-4 sm:p-8 relative overflow-hidden">
 
-          {/* Role tabs */}
-          <div className="flex gap-1.5 bg-surface-secondary rounded-lg p-1 mb-6">
-            {TABS.map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setRole(tab.key)}
-                className={`flex-1 py-1.5 text-xs font-600 rounded-md transition-all duration-150
-                  ${role === tab.key
-                    ? `bg-gradient-to-r ${tab.color} text-white shadow-sm`
-                    : 'text-text-muted hover:text-text-primary'}`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        {/* Decorative blurred accents */}
+        <div className={`absolute -top-24 -right-24 w-72 h-72 rounded-full bg-gradient-to-br ${activeTab.color} opacity-20 blur-3xl transition-colors duration-500`} />
+        <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-[#00b894]/10 blur-3xl" />
+
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8 relative z-10">
+
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-6 sm:mb-8">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1f2b44] to-[#324a70] flex items-center justify-center shrink-0">
+              <span className="text-white text-xl font-extrabold">N</span>
+            </div>
+            <div>
+              <h2 className="text-2xl font-extrabold text-[#1f2b44]">NexHR</h2>
+              <p className="text-sm text-slate-500">Enterprise HRMS</p>
+            </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
+            Welcome Back
+          </h3>
+          <p className="text-slate-500 mb-6 sm:mb-8">
+            Sign in to continue to your workspace
+          </p>
+
+          {/* Role Selector */}
+          <div className="grid grid-cols-2 gap-2 mb-6">
+            {TABS.map(tab => {
+              const Icon = tab.icon
+              const active = role === tab.key
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setRole(tab.key)}
+                  className={`
+                    flex items-center justify-center gap-2
+                    py-2.5 px-2 rounded-xl text-sm font-bold
+                    transition-all duration-200
+                    ${active
+                      ? `bg-gradient-to-r ${tab.color} text-white shadow-md scale-[1.02]`
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }
+                  `}
+                >
+                  <Icon size={16} />
+                  <span className="truncate">{tab.label}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-5">
             {/* Email */}
             <div>
-              <label className="text-xs font-600 text-text-primary block mb-1.5">Email Address</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                Email Address
+              </label>
               <div className="relative">
-                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"/>
+                <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="email"
                   placeholder={DEMO_USERS[role].email}
                   value={form.email}
-                  onChange={e => setForm({...form, email: e.target.value})}
-                  className="w-full pl-9 pr-3 py-2.5 border border-border rounded-md text-sm placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl text-sm font-medium
+                    focus:outline-none focus:ring-2 focus:ring-[#00b894]/30 focus:border-[#00b894]
+                    transition-colors"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-600 text-text-primary">Password</label>
-                <a href="/forgot-password" className="text-xs text-accent-blue hover:underline font-500">Forgot password?</a>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-bold text-slate-700">Password</label>
+                <a href="/forgot-password" className="text-xs font-semibold text-[#0984e3] hover:underline">
+                  Forgot Password?
+                </a>
               </div>
               <div className="relative">
-                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"/>
+                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type={showPass ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={form.password}
-                  onChange={e => setForm({...form, password: e.target.value})}
-                  className="w-full pl-9 pr-10 py-2.5 border border-border rounded-md text-sm placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  className="w-full pl-11 pr-12 py-3 border border-slate-200 rounded-xl text-sm font-medium
+                    focus:outline-none focus:ring-2 focus:ring-[#00b894]/30 focus:border-[#00b894]
+                    transition-colors"
                 />
-                <button type="button" onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors">
-                  {showPass ? <EyeOff size={15}/> : <Eye size={15}/>}
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
 
+            {/* Remember me */}
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-[#00b894] focus:ring-[#00b894]/30"
+              />
+              <span className="text-sm text-slate-600 font-medium">Remember me on this device</span>
+            </label>
+
+            {/* Login Button */}
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-2.5 rounded-md text-sm font-700 text-white transition-all duration-150
-                bg-gradient-to-r ${activeTab.color} hover:opacity-90 shadow-sm
-                disabled:opacity-60 flex items-center justify-center gap-2`}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#1f2b44] to-[#324a70]
+                hover:from-[#162033] hover:to-[#1f2b44]
+                text-white font-bold transition-all shadow-lg
+                flex items-center justify-center gap-2
+                disabled:opacity-70 active:scale-[0.99]"
             >
               {loading ? (
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"/>
+                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <><Zap size={15}/> Sign In to NexHR</>
+                <>
+                  <Zap size={18} />
+                  Sign In
+                </>
               )}
             </button>
           </form>
 
-          {/* Demo hint */}
-          <div className="mt-5 p-3 bg-surface-secondary rounded-lg border border-border">
-            <p className="text-xs text-text-muted text-center">
-              <span className="font-600 text-text-secondary">Demo mode</span> — select a role tab and click Sign In
+          <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 justify-center">
+            <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${activeTab.color}`} />
+            <p className="text-xs text-center text-slate-500">
+              Demo Mode — Signing in as <span className="font-semibold text-slate-700">{activeTab.label}</span>
             </p>
           </div>
+
         </div>
       </div>
     </div>

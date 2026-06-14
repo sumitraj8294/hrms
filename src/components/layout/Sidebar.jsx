@@ -34,7 +34,7 @@ export default function Sidebar() {
   return (
     <div className="flex h-screen flex-shrink-0">
       {/* ── Icon rail ── */}
-      <aside className="flex flex-col w-[64px] bg-sidebar border-r border-sidebar-border flex-shrink-0 z-20">
+      <aside className="flex flex-col w-[110px] bg-gradient-to-b from-[#1f2b44] to-[#162033] border-r border-sidebar-border flex-shrink-0 z-20">
         {/* Logo */}
         <div className="flex items-center justify-center h-12 border-b border-sidebar-border">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent-teal flex items-center justify-center cursor-pointer" onClick={() => navigate('/dashboard')}>
@@ -55,19 +55,27 @@ export default function Sidebar() {
                 onClick={() => handleIconClick(item)}
                 title={item.label}
                 className={`relative flex flex-col items-center justify-center w-full py-2.5 px-1 transition-all duration-150 group
-                  ${isActive ? 'text-primary' : 'text-slate-500 hover:text-slate-300'}`}
+                  ${isActive ? 'text-white' : 'text-slate-200 hover:text-white'}`}
               >
                 {/* Active left bar */}
                 {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full"/>}
 
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
-                  ${isActive ? 'bg-primary/15' : isOpen ? 'bg-sidebar-surface' : 'group-hover:bg-sidebar-surface'}`}>
+                  ${isActive
+  ? 'bg-[#5B3FD4]'
+  : isOpen
+  ? 'bg-white/10'
+  : 'group-hover:bg-white/10'
+}`}>
                   <Icon size={17}/>
                 </div>
-                <span className={`text-[9px] font-600 mt-0.5 leading-none text-center
-                  ${isActive ? 'text-primary' : 'text-slate-600'}`}>
-                  {item.label.split(' ')[0]}
-                </span>
+                <span
+  className={`text-[11px] font-bold mt-1 leading-none text-center
+    ${isActive ? 'text-white' : 'text-slate-200'}
+  `}
+>
+  {item.label.split(' ')[0]}
+</span>
               </button>
             )
           })}
@@ -86,14 +94,17 @@ export default function Sidebar() {
 
       {/* ── Submenu panel ── */}
       {submenuItems.length > 0 && openMenu && (
-        <div className="flex flex-col w-[180px] bg-[#1a1d27] border-r border-sidebar-border flex-shrink-0 z-10">
+        <div className="flex flex-col w-[220px] bg-gradient-to-b from-[#1f2b44] to-[#162033] border-r border-violet-800 flex-shrink-0 z-10">
           {/* Panel header */}
-          <div className="h-12 flex items-center justify-between px-4 border-b border-sidebar-border">
-            <span className="text-xs font-700 text-slate-200">
+          <div className="h-12 flex items-center justify-between px-4 border-b border-violet-800">
+            <span className="text-sm font-extrabold text-violet-100 tracking-wide">
               {navItems.find(n => n.key === openMenu)?.label}
             </span>
-            <button onClick={() => setActiveMenu(null)} className="text-slate-600 hover:text-slate-300 transition-colors">
-              <Icons.X size={13}/>
+            <button
+  onClick={() => setActiveMenu(null)}
+  className="text-violet-300 hover:text-white transition-colors p-1 rounded-md hover:bg-white/10"
+>
+             <Icons.X size={16} />
             </button>
           </div>
 
@@ -107,12 +118,11 @@ export default function Sidebar() {
                   key={child.key}
                   to={child.path}
                   onClick={() => {/* keep panel open */}}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-500 transition-all duration-150 mb-0.5
+                  className={`flex items-center px-3 py-2.5 rounded-lg text-xs font-500 transition-all duration-150 mb-0.5
                     ${isActive
-                      ? 'bg-primary/20 text-primary font-700'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-sidebar-surface'}`}
+  ? 'bg-[#5B3FD4] text-white font-extrabold shadow-md'
+  : 'text-violet-100 hover:text-white hover:bg-white/10 font-bold'}`}
                 >
-                  <span className={`w-1 h-1 rounded-full flex-shrink-0 ${isActive ? 'bg-primary' : 'bg-slate-600'}`}/>
                   {child.label}
                 </NavLink>
               )
