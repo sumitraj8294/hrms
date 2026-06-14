@@ -1,0 +1,6 @@
+export const GENDER_OPTIONS     = ['Male','Female','Other','Prefer not to say']
+export const EMPLOYMENT_TYPES   = ['Full-Time','Part-Time','Contract','Intern']
+export const LEAVE_TYPES        = ['Casual Leave','Sick Leave','Earned Leave','Comp Off','Maternity Leave','Paternity Leave']
+export const TICKET_CATEGORIES  = ['Payroll Issue','Leave Policy','IT Support','HR Query','Other']
+export const TICKET_PRIORITIES  = ['Low','Medium','High','Critical']
+export const DEPT_LIST          = ['Engineering','Sales','HR','Finance','Operations','Marketing','Legal','Support']
