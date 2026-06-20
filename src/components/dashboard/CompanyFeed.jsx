@@ -14,7 +14,8 @@ const INITIAL_FEED = [
   },
   {
     id:2, tab:'Announcement', type:'appreciation',
-    user:'Arjun Singh', praised:'Kriti Verma', time:'Today 11:10 AM',
+    user:'Arjun Singh', userImg:'https://i.pravatar.cc/150?img=33',
+    praised:'Kriti Verma', time:'Today 11:10 AM',
     icon:ThumbsUp, iconBg:'bg-blue-100', iconColor:'text-blue-600',
     badge:'🥇', title:'Excellent Execution!',
     content:"Arjun's dedication and focus on delivering quality results has been truly outstanding.",
@@ -25,12 +26,19 @@ const INITIAL_FEED = [
     time:'This week · 5 people',
     icon:Gift, iconBg:'bg-pink-100', iconColor:'text-pink-600',
     title:'Celebrating Birthdays',
-    users:['Alice','Manjuna','Kedhar','Divya','Ritika'],
+    users:[
+      { name:'Alice',   img:'https://i.pravatar.cc/150?img=5'  },
+      { name:'Manjuna', img:'https://i.pravatar.cc/150?img=12' },
+      { name:'Kedhar',  img:'https://i.pravatar.cc/150?img=22' },
+      { name:'Divya',   img:'https://i.pravatar.cc/150?img=47' },
+      { name:'Ritika',  img:'https://i.pravatar.cc/150?img=29' },
+    ],
     likes:18, comments:8,
   },
   {
     id:4, tab:'Poll', type:'poll',
-    user:'Pooja Iyer', time:'Yesterday',
+    user:'Pooja Iyer', userImg:'https://i.pravatar.cc/150?img=44',
+    time:'Yesterday',
     icon:BarChart2, iconBg:'bg-violet-100', iconColor:'text-violet-600',
     question:'Which activity would you prefer for our team building this quarter?',
     options:[
@@ -42,11 +50,13 @@ const INITIAL_FEED = [
   },
   {
     id:5, tab:'Video', type:'video',
-    user:'HR Team', role:'Administration', time:'2 days ago',
+    user:'HR Team', userImg:'https://i.pravatar.cc/150?img=60',
+    role:'Administration', time:'2 days ago',
     icon:Video, iconBg:'bg-red-100', iconColor:'text-red-600',
     title:'FY2024 Company Town Hall Recording',
     content:'Watch the full recording of our annual town hall session with the leadership team.',
     videoUrl:'https://www.w3schools.com/html/mov_bbb.mp4',
+    videoPoster:'https://picsum.photos/seed/townhall/640/360',
     likes:56, comments:14,
   },
 ]
@@ -115,7 +125,11 @@ export default function CompanyFeed({ extraPosts = [] }) {
               {item.type === 'post' && (
                 <>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <Avatar name={item.user} size="sm"/>
+                    {item.userImg ? (
+                      <img src={item.userImg} alt={item.user} className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-border"/>
+                    ) : (
+                      <Avatar name={item.user} size="sm"/>
+                    )}
                     <div>
                       <p className="text-[11px] font-700 text-text-primary">{item.user}</p>
                       <p className="text-[10px] text-text-muted">{item.role || ''}</p>
@@ -136,7 +150,11 @@ export default function CompanyFeed({ extraPosts = [] }) {
                 <>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{item.badge}</span>
-                    <Avatar name={item.user} size="sm"/>
+                    {item.userImg ? (
+                      <img src={item.userImg} alt={item.user} className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-border"/>
+                    ) : (
+                      <Avatar name={item.user} size="sm"/>
+                    )}
                     <p className="text-[11px] text-text-secondary">
                       <span className="font-600 text-primary">{item.user}</span> received appreciation from <span className="font-600 text-primary">{item.praised}</span>
                     </p>
@@ -154,8 +172,12 @@ export default function CompanyFeed({ extraPosts = [] }) {
                   <div className="flex gap-3">
                     {item.users?.slice(0,4).map((u,j) => (
                       <div key={j} className="flex flex-col items-center gap-1">
-                        <Avatar name={u} size="sm"/>
-                        <span className="text-[9px] text-text-muted">{u}</span>
+                        {u.img ? (
+                          <img src={u.img} alt={u.name} className="w-8 h-8 rounded-full object-cover border border-border"/>
+                        ) : (
+                          <Avatar name={u.name || u} size="sm"/>
+                        )}
+                        <span className="text-[9px] text-text-muted">{u.name || u}</span>
                       </div>
                     ))}
                   </div>
@@ -189,7 +211,11 @@ export default function CompanyFeed({ extraPosts = [] }) {
               {item.type === 'video' && (
                 <>
                   <div className="flex items-center gap-2 mb-2">
-                    <Avatar name={item.user} size="sm"/>
+                    {item.userImg ? (
+                      <img src={item.userImg} alt={item.user} className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-border"/>
+                    ) : (
+                      <Avatar name={item.user} size="sm"/>
+                    )}
                     <div>
                       <p className="text-[11px] font-700 text-text-primary">{item.user}</p>
                       <p className="text-[10px] text-text-muted">{item.role}</p>
@@ -197,7 +223,12 @@ export default function CompanyFeed({ extraPosts = [] }) {
                   </div>
                   <p className="text-xs font-600 text-text-primary mb-1">{item.title}</p>
                   <p className="text-xs text-text-secondary mb-2 leading-relaxed">{item.content}</p>
-                  <video src={item.videoUrl} controls className="w-full rounded-lg border border-border max-h-36"/>
+                  <video
+                    src={item.videoUrl}
+                    poster={item.videoPoster}
+                    controls
+                    className="w-full rounded-lg border border-border max-h-36"
+                  />
                 </>
               )}
 

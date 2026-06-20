@@ -99,6 +99,7 @@ export default function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard"              element={<DashboardRouter />} />
           <Route path="/core-hr"                element={<EmployeeList />} />
+          <Route path="/core-hr/directory"       element={<EmployeeList />} />
           <Route path="/core-hr/add"            element={<AddEmployee />} />
           <Route path="/core-hr/:id"            element={<EmployeeProfile />} />
           <Route path="/core-hr/org"            element={<OrgChart />} />

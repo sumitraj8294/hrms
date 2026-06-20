@@ -1,13 +1,12 @@
 import { CheckCircle2, XCircle, Clock } from 'lucide-react'
 import { useState } from 'react'
-import Avatar from '@/components/ui/Avatar'
 
 const INITIAL = [
-  { id:1, name:'Priya Sharma',  type:'Casual Leave',    detail:'Jun 10 – Jun 11 · 2 days',   category:'leave',    urgency:'normal' },
-  { id:2, name:'Rahul Verma',   type:'Work From Home',  detail:'Jun 13 – Jun 15 · 3 days',   category:'wfh',      urgency:'high'   },
-  { id:3, name:'Anita Roy',     type:'Expense Claim',   detail:'₹3,200 · Travel reimbursement',category:'expense', urgency:'normal' },
-  { id:4, name:'Siddharth K.',  type:'Regularization',  detail:'Jun 8 · Late clock-in',       category:'attendance',urgency:'low'  },
-  { id:5, name:'Kavya Nair',    type:'Overtime Request', detail:'Jun 9 · 3 extra hours',      category:'attendance',urgency:'normal'},
+  { id:1, name:'Priya Sharma',  type:'Casual Leave',    detail:'Jun 10 – Jun 11 · 2 days',    category:'leave',     urgency:'normal', img:'https://i.pravatar.cc/150?img=47' },
+  { id:2, name:'Rahul Verma',   type:'Work From Home',  detail:'Jun 13 – Jun 15 · 3 days',    category:'wfh',       urgency:'high',   img:'https://i.pravatar.cc/150?img=14' },
+  { id:3, name:'Anita Roy',     type:'Expense Claim',   detail:'₹3,200 · Travel reimbursement',category:'expense',  urgency:'normal', img:'https://i.pravatar.cc/150?img=31' },
+  { id:4, name:'Siddharth K.',  type:'Regularization',  detail:'Jun 8 · Late clock-in',        category:'attendance',urgency:'low',   img:'https://i.pravatar.cc/150?img=53' },
+  { id:5, name:'Kavya Nair',    type:'Overtime Request', detail:'Jun 9 · 3 extra hours',       category:'attendance',urgency:'normal', img:'https://i.pravatar.cc/150?img=44' },
 ]
 
 const CATEGORY_COLORS = {
@@ -47,7 +46,11 @@ export default function PendingApprovals() {
           </div>
         ) : items.map(item => (
           <div key={item.id} className={`flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors ${URGENCY[item.urgency]}`}>
-            <Avatar name={item.name} size="sm"/>
+            <img
+              src={item.img}
+              alt={item.name}
+              className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-slate-200"
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <p className="text-xs font-600 text-text-primary truncate">{item.name}</p>

@@ -7,8 +7,8 @@ export const NAV_ITEMS = [
   {
     key: 'core-hr', label: 'Core HR', icon: 'Users', path: '/core-hr', roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.HR],
     children: [
-      { key: 'employee-master',    label: 'Employee Master',    path: '/core-hr' },
-      { key: 'employee-directory', label: 'Employee Directory', path: '/core-hr?view=directory' },
+      { key: 'employee-master',    label: 'Employee Directory',    path: '/core-hr' },
+      // { key: 'employee-directory', label: 'Employee Directory', path: '/core-hr/directory' },
       { key: 'add-employee',       label: 'Add Employee',       path: '/core-hr/add' },
       { key: 'org-chart',          label: 'Org Chart',          path: '/core-hr/org' },
       { key: 'departments',        label: 'Departments',        path: '/core-hr/departments' },

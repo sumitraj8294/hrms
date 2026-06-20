@@ -13,6 +13,9 @@ import {
 import { useAuth } from '@/context/AuthContext'
 import dayjs from 'dayjs'
 
+// Sample fallback avatar (used when the logged-in user has no photo on their profile)
+const SAMPLE_AVATAR = 'https://i.pravatar.cc/150?img=47'
+
 export default function Topbar() {
   const { user, logout } = useAuth()
   const now = dayjs().format('ddd, DD MMM YYYY')
@@ -38,6 +41,8 @@ export default function Topbar() {
         handleClickOutside
       )
   }, [])
+
+  const avatarSrc = user?.avatar || SAMPLE_AVATAR
 
   return (
     <header className="h-14 bg-gradient-to-r from-[#1f2b44] via-[#1b2740] to-[#162033] border-b border-white/10 flex items-center px-5 shadow-sm">
@@ -108,9 +113,11 @@ export default function Topbar() {
             onClick={() => setOpenMenu(!openMenu)}
             className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white/10 transition-all"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 via-purple-600 to-fuchsia-600 flex items-center justify-center text-white text-sm font-bold">
-              {user?.name?.charAt(0) || 'U'}
-            </div>
+            <img
+              src={avatarSrc}
+              alt={user?.name || 'User'}
+              className="w-8 h-8 rounded-full object-cover border border-white/20"
+            />
 
             <span className="hidden sm:block text-sm font-semibold text-white">
               {user?.name}
@@ -128,14 +135,21 @@ export default function Topbar() {
             <div className="absolute right-0 top-12 w-60 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden z-50">
 
               {/* User Info */}
-              <div className="px-4 py-3 border-b bg-slate-50">
-                <p className="font-semibold text-slate-900">
-                  {user?.name}
-                </p>
+              <div className="px-4 py-3 border-b bg-slate-50 flex items-center gap-3">
+                <img
+                  src={avatarSrc}
+                  alt={user?.name || 'User'}
+                  className="w-10 h-10 rounded-full object-cover border border-slate-200 flex-shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-900 truncate">
+                    {user?.name}
+                  </p>
 
-                <p className="text-xs text-slate-500 mt-1">
-                  {user?.email || user?.role}
-                </p>
+                  <p className="text-xs text-slate-500 mt-0.5 truncate">
+                    {user?.email || user?.role}
+                  </p>
+                </div>
               </div>
 
               {/* Menu Items */}

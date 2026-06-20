@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { getNavForRole } from '@/config/navigation'
@@ -10,14 +10,33 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const navItems = getNavForRole(user?.role)
 
-  // track which top-level menu is expanded in the submenu panel
   const [activeMenu, setActiveMenu] = useState(null)
 
-  // figure out which top-level key is currently "open" based on URL
-  const currentTopKey = navItems.find(item =>
-    item.path === location.pathname ||
-    item.children?.some(c => location.pathname.startsWith(c.path) && c.path !== '/')
-  )?.key
+  // Check if a child path is active — exact match only, no startsWith confusion
+  const isChildActive = (child) => {
+    // Exact match always works
+    if (location.pathname === child.path) return true
+    // Prefix match ONLY for paths deeper than 2 segments e.g. /core-hr/add, /core-hr/123
+    // This prevents /core-hr matching /core-hr/directory etc.
+    const segments = child.path.split('/').filter(Boolean)
+    if (segments.length >= 2) {
+      return location.pathname.startsWith(child.path + '/')
+    }
+    return false
+  }
+
+  // Find which top-level nav item owns the current URL
+  const currentTopKey = navItems.find(item => {
+    if (location.pathname === item.path) return true
+    if (item.children?.length) return item.children.some(c => isChildActive(c))
+    if (item.path !== '/') return location.pathname.startsWith(item.path + '/')
+    return false
+  })?.key
+
+  // Auto-open panel when URL changes (e.g. on page refresh or direct navigation)
+  useEffect(() => {
+    if (currentTopKey) setActiveMenu(currentTopKey)
+  }, [currentTopKey])
 
   const handleIconClick = (item) => {
     if (item.children?.length) {
@@ -28,7 +47,7 @@ export default function Sidebar() {
     }
   }
 
-  const openMenu = activeMenu || currentTopKey
+  const openMenu     = activeMenu || currentTopKey
   const submenuItems = navItems.find(n => n.key === openMenu)?.children || []
 
   return (
@@ -57,25 +76,16 @@ export default function Sidebar() {
                 className={`relative flex flex-col items-center justify-center w-full py-2.5 px-1 transition-all duration-150 group
                   ${isActive ? 'text-white' : 'text-slate-200 hover:text-white'}`}
               >
-                {/* Active left bar */}
                 {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full"/>}
 
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all
-                  ${isActive
-  ? 'bg-[#5B3FD4]'
-  : isOpen
-  ? 'bg-white/10'
-  : 'group-hover:bg-white/10'
-}`}>
+                  ${isActive ? 'bg-[#5B3FD4]' : isOpen ? 'bg-white/10' : 'group-hover:bg-white/10'}`}>
                   <Icon size={17}/>
                 </div>
-                <span
-  className={`text-[11px] font-bold mt-1 leading-none text-center
-    ${isActive ? 'text-white' : 'text-slate-200'}
-  `}
->
-  {item.label.split(' ')[0]}
-</span>
+                <span className={`text-[11px] font-bold mt-1 leading-none text-center
+                  ${isActive ? 'text-white' : 'text-slate-200'}`}>
+                  {item.label.split(' ')[0]}
+                </span>
               </button>
             )
           })}
@@ -95,33 +105,29 @@ export default function Sidebar() {
       {/* ── Submenu panel ── */}
       {submenuItems.length > 0 && openMenu && (
         <div className="flex flex-col w-[220px] bg-gradient-to-b from-[#1f2b44] to-[#162033] border-r border-violet-800 flex-shrink-0 z-10">
-          {/* Panel header */}
           <div className="h-12 flex items-center justify-between px-4 border-b border-violet-800">
             <span className="text-sm font-extrabold text-violet-100 tracking-wide">
               {navItems.find(n => n.key === openMenu)?.label}
             </span>
             <button
-  onClick={() => setActiveMenu(null)}
-  className="text-violet-300 hover:text-white transition-colors p-1 rounded-md hover:bg-white/10"
->
-             <Icons.X size={16} />
+              onClick={() => setActiveMenu(null)}
+              className="text-violet-300 hover:text-white transition-colors p-1 rounded-md hover:bg-white/10"
+            >
+              <Icons.X size={16}/>
             </button>
           </div>
 
-          {/* Submenu links */}
           <nav className="flex-1 overflow-y-auto py-2 px-2">
             {submenuItems.map(child => {
-              const isActive = location.pathname === child.path ||
-                (child.path !== '/core-hr' && location.pathname.startsWith(child.path))
+              const active = isChildActive(child)
               return (
                 <NavLink
                   key={child.key}
                   to={child.path}
-                  onClick={() => {/* keep panel open */}}
-                  className={`flex items-center px-3 py-2.5 rounded-lg text-xs font-500 transition-all duration-150 mb-0.5
-                    ${isActive
-  ? 'bg-[#5B3FD4] text-white font-extrabold shadow-md'
-  : 'text-violet-100 hover:text-white hover:bg-white/10 font-bold'}`}
+                  className={`flex items-center px-3 py-2.5 rounded-lg text-xs transition-all duration-150 mb-0.5
+                    ${active
+                      ? 'bg-[#5B3FD4] text-white font-extrabold shadow-md'
+                      : 'text-violet-100 hover:text-white hover:bg-white/10 font-bold'}`}
                 >
                   {child.label}
                 </NavLink>

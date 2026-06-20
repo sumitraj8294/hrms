@@ -7,6 +7,13 @@ import {
   TrendingDown,
 } from 'lucide-react'
 
+import totalEmployeesImg from '../../assets/dashboard/welcome.png'
+import presentTodayImg from '../../assets/dashboard/present.png'
+import onLeaveImg from '../../assets/dashboard/leave.png'
+import openPositionsImg from '../../assets/dashboard/openposition.png'
+import payrollImg from '../../assets/dashboard/payroll.png'
+import attritionImg from '../../assets/dashboard/attrition.png'
+
 const kpis = [
   {
     label: 'Total Employees',
@@ -14,6 +21,7 @@ const kpis = [
     change: '+12 this month',
     up: true,
     icon: Users,
+    img: totalEmployeesImg,
     bg: 'bg-violet-50',
     ic: 'text-violet-600',
     highlight: true,
@@ -24,6 +32,7 @@ const kpis = [
     change: '79% attendance',
     up: true,
     icon: Clock,
+    img: presentTodayImg,
     bg: 'bg-emerald-50',
     ic: 'text-emerald-600',
   },
@@ -33,6 +42,7 @@ const kpis = [
     change: '-3 vs yesterday',
     up: false,
     icon: CalendarOff,
+    img: onLeaveImg,
     bg: 'bg-amber-50',
     ic: 'text-amber-600',
   },
@@ -42,6 +52,7 @@ const kpis = [
     change: '+2 this week',
     up: true,
     icon: UserPlus,
+    img: openPositionsImg,
     bg: 'bg-blue-50',
     ic: 'text-blue-600',
   },
@@ -51,6 +62,7 @@ const kpis = [
     change: 'Disbursed',
     up: true,
     icon: DollarSign,
+    img: payrollImg,
     bg: 'bg-pink-50',
     ic: 'text-pink-600',
     highlight: true,
@@ -61,6 +73,7 @@ const kpis = [
     change: '-0.4% this qtr',
     up: false,
     icon: TrendingDown,
+    img: attritionImg,
     bg: 'bg-red-50',
     ic: 'text-red-500',
   },
@@ -87,6 +100,8 @@ export default function KPIWidgets() {
               transition-all
               duration-300
               cursor-pointer
+              relative
+              overflow-hidden
               ${
                 k.highlight
                   ? 'border border-violet-200 ring-1 ring-violet-100'
@@ -145,6 +160,15 @@ export default function KPIWidgets() {
                 {k.change}
               </p>
             </div>
+
+            {/* Right-side image */}
+            {k.img && (
+              <img
+                src={k.img}
+                alt=""
+                className="w-16 h-16 object-contain flex-shrink-0 opacity-90"
+              />
+            )}
           </div>
         )
       })}

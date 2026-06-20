@@ -3,39 +3,69 @@ import { createContext, useContext, useState, useEffect } from 'react'
 const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]       = useState(null)
-  const [token, setToken]     = useState(() => localStorage.getItem('nexhr_token'))
+  const [token, setToken] = useState(() =>
+    localStorage.getItem('nexhr_token')
+  )
+
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('nexhr_user')
+    return storedUser ? JSON.parse(storedUser) : null
+  })
+
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const stored = localStorage.getItem('nexhr_user')
-    if (stored && token) setUser(JSON.parse(stored))
+    if (token) {
+      const storedUser = localStorage.getItem('nexhr_user')
+
+      if (storedUser) {
+        setUser(JSON.parse(storedUser))
+      }
+    } else {
+      setUser(null)
+    }
+
     setLoading(false)
-  }, [])
+  }, [token])
 
   const login = (userData, authToken) => {
-    setUser(userData)
-    setToken(authToken)
     localStorage.setItem('nexhr_token', authToken)
     localStorage.setItem('nexhr_user', JSON.stringify(userData))
+
+    setToken(authToken)
+    setUser(userData)
   }
 
   const logout = () => {
-    setUser(null)
-    setToken(null)
     localStorage.removeItem('nexhr_token')
     localStorage.removeItem('nexhr_user')
+
+    setToken(null)
+    setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        logout,
+        isAuthenticated: !!token,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
 }
 
 export const useAuth = () => {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
+  const context = useContext(AuthContext)
+
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider')
+  }
+
+  return context
 }

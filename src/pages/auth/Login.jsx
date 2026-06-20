@@ -5,6 +5,8 @@ import { Mail, Lock, Eye, EyeOff, Zap, ShieldCheck, UserCog, Users, User } from 
 import { useAuth } from '@/context/AuthContext'
 import toast from 'react-hot-toast'
 import loginImage from '@/assets/login-image.png'
+import hrorbitLogo from '@/assets/Hrorbit_white.png'
+import api from '@/services/api'
 
 const DEMO_USERS = {
   super_admin: { name: 'Super Admin',  role: 'super_admin', email: 'superadmin@nexhr.com' },
@@ -31,12 +33,69 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault()
+    console.log('%c[LOGIN] Form submitted', 'color: #00b894; font-weight: bold')
+
+    if (!form.email || !form.password) {
+      console.warn('[LOGIN] Missing email or password', form)
+      return toast.error('Enter email and password')
+    }
+
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800))
-    login(DEMO_USERS[role], 'demo_token_' + role)
-    toast.success(`Welcome back, ${DEMO_USERS[role].name}!`)
-    navigate('/dashboard')
-    setLoading(false)
+    console.log('[LOGIN] Sending POST /auth/login with email:', form.email)
+
+    try {
+      const response = await api.post('/auth/login', {
+        email: form.email,
+        password: form.password,
+      })
+
+      console.log('%c[LOGIN] Raw response received:', 'color: #0984e3; font-weight: bold', response)
+
+      // Support both response formats:
+      // { data: { user, token } }
+      // { user, token }
+      const user = response.data?.user || response.user
+      const token = response.data?.token || response.token
+
+      console.log('[LOGIN] Parsed user:', user)
+      console.log('[LOGIN] Parsed token (first 20 chars):', token ? token.slice(0, 20) + '...' : 'MISSING')
+
+      if (!user || !token) {
+        console.error('[LOGIN] ❌ Missing user or token in response:', response)
+        return toast.error('Invalid login response from server')
+      }
+
+      login(user, token)
+      console.log('%c[LOGIN] ✅ login() called — checking localStorage now', 'color: #00b894; font-weight: bold')
+      console.log('[LOGIN] localStorage nexhr_token:', localStorage.getItem('nexhr_token')?.slice(0, 20) + '...')
+      console.log('[LOGIN] localStorage nexhr_user:', localStorage.getItem('nexhr_user'))
+
+      toast.success(`Welcome, ${user.name}!`)
+
+      console.log('[LOGIN] Navigating to /dashboard ...')
+      navigate('/dashboard', { replace: true })
+
+      // Check shortly after navigation whether localStorage still holds the token
+      // (helps catch the 401-interceptor wipe-and-redirect bug)
+      setTimeout(() => {
+        const stillThere = localStorage.getItem('nexhr_token')
+        if (!stillThere) {
+          console.error('%c[LOGIN] ⚠️ Token was REMOVED shortly after navigating — likely a 401 from a post-login API call wiped it. Check Network tab for a red request.', 'color: #ff4d4f; font-weight: bold')
+        } else {
+          console.log('%c[LOGIN] ✅ Token still present 1.5s after navigation', 'color: #00b894')
+        }
+      }, 1500)
+
+    } catch (err) {
+      console.error('%c[LOGIN] ❌ Login request failed', 'color: #ff4d4f; font-weight: bold')
+      console.error('[LOGIN] Error object:', err)
+      console.error('[LOGIN] Error status:', err?.status || err?.response?.status)
+      console.error('[LOGIN] Error message:', err.message || err.error)
+      toast.error(err.message || err.error || 'Login failed')
+    } finally {
+      setLoading(false)
+      console.log('[LOGIN] handleLogin finished, loading set to false')
+    }
   }
 
   const activeTab = TABS.find(t => t.key === role)
@@ -51,12 +110,12 @@ export default function Login() {
 
         <div className="absolute bottom-12 left-12 max-w-xl text-white">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <span className="font-extrabold text-2xl">N</span>
-            </div>
-            <div>
-              <h2 className="text-2xl font-extrabold">NexHR</h2>
-              <p className="text-slate-300 text-sm">Enterprise HR Management Platform</p>
+            <div className="w-35 h-28 rounded-xl bg-white/20 backdrop-blur-sm overflow-hidden">
+              <img
+                src={hrorbitLogo}
+                alt="HR Orbit Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
           </div>
 
