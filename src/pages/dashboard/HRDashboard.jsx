@@ -22,8 +22,8 @@ import notInOfficeImg   from '@/assets/dashboard/absent.png'
 import leaveBalancesImg from '@/assets/dashboard/outofoffice.png'
 import projectTimeImg   from '@/assets/dashboard/project.png'
 import salaryUpdateImg  from '@/assets/dashboard/salary.png'
-import appraisalImg     from '@/assets/dashboard/welcome.png'
-import goalsImg         from '@/assets/dashboard/welcome.png'
+import appraisalImg     from '@/assets/dashboard/appraisal.png'
+import goalsImg         from '@/assets/dashboard/goals.png'
 
 // Quick-access card data
 const absent = [

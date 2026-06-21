@@ -5,7 +5,6 @@ import {
   Code2, Palette, TrendingUp, Wallet, Headphones, Megaphone, Scale, Settings2,
   MapPin, Calendar, Briefcase, Sparkles
 } from 'lucide-react'
-import Avatar from '@/components/ui/Avatar'
 import Badge from '@/components/ui/Badge'
 import Spinner from '@/components/ui/Spinner'
 import { employeeService, departmentService } from '@/services/employeeService'
@@ -18,7 +17,6 @@ const STATUS_BADGE = {
   inactive:  { label:'Inactive',  variant:'gray'   },
 }
 
-// Department → icon + gradient mapping (matches by keyword, case-insensitive)
 const DEPT_STYLES = [
   { match:/engineer|tech|dev/i,        icon:Code2,      grad:'from-blue-500 to-cyan-400',     bg:'bg-blue-50',    text:'text-blue-600'   },
   { match:/design|ux|ui/i,             icon:Palette,    grad:'from-pink-500 to-rose-400',     bg:'bg-pink-50',    text:'text-pink-600'   },
@@ -34,6 +32,62 @@ function getDeptStyle(deptName = '') {
   return DEPT_STYLES.find(s => s.match.test(deptName)) || {
     icon: Briefcase, grad:'from-slate-500 to-slate-400', bg:'bg-slate-100', text:'text-slate-600',
   }
+}
+
+/**
+ * Real sample photos from randomuser.me.
+ * - Uses emp.avatar if the backend provides one.
+ * - Otherwise picks a deterministic real photo based on a hash of the name.
+ *   randomuser.me serves 100 male + 100 female portrait photos (seed 1-99).
+ *   We alternate gender by first-letter parity so the directory looks diverse.
+ */
+function hashCode(str) {
+  let h = 0
+  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0
+  return Math.abs(h)
+}
+
+function getAvatarUrl(emp) {
+  if (emp.avatar) return emp.avatar
+  const seed   = hashCode(`${emp.firstName}${emp.lastName}`)
+  const num    = (seed % 70) + 1          // 1-70, plenty of variety
+  const gender = seed % 2 === 0 ? 'men' : 'women'
+  return `https://randomuser.me/api/portraits/${gender}/${num}.jpg`
+}
+
+/** Inline avatar component — no dependency on the old Avatar component */
+function EmpAvatar({ emp, size = 'md' }) {
+  const url = getAvatarUrl(emp)
+  const name = `${emp.firstName} ${emp.lastName}`
+
+  const sizeClass = {
+    sm:  'w-10 h-10 text-sm',   // 40px  (was ~28px)
+    md:  'w-14 h-14 text-base', // 56px  (was ~36px)
+    lg:  'w-20 h-20 text-xl',   // 80px
+  }[size] ?? 'w-14 h-14'
+
+  return (
+    <div className={`${sizeClass} rounded-full overflow-hidden ring-2 ring-white shadow-md flex-shrink-0 bg-slate-100`}>
+      <img
+        src={url}
+        alt={name}
+        className="w-full h-full object-cover"
+        onError={e => {
+          // Fallback to initials if image fails
+          e.currentTarget.style.display = 'none'
+          e.currentTarget.nextSibling?.style && (e.currentTarget.nextSibling.style.display = 'flex')
+        }}
+      />
+      {/* Initials fallback (hidden by default) */}
+      <div
+        aria-hidden="true"
+        style={{ display:'none' }}
+        className={`${sizeClass} rounded-full bg-gradient-to-br from-slate-400 to-slate-600 items-center justify-center font-700 text-white absolute inset-0`}
+      >
+        {name.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
+      </div>
+    </div>
+  )
 }
 
 export default function EmployeeList() {
@@ -114,7 +168,6 @@ export default function EmployeeList() {
           />
         </div>
 
-        {/* Dept filter chips with icons */}
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => handleDeptFilter('')}
@@ -168,25 +221,22 @@ export default function EmployeeList() {
                   className={`relative rounded-xl p-4 cursor-pointer overflow-hidden border border-white/60
                     bg-gradient-to-br ${style.bg} via-white to-white
                     hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group`}
-                  style={{ backgroundImage: `linear-gradient(135deg, var(--tw-gradient-stops))` }}
                 >
-
-                  {/* Soft gradient wash background */}
+                  {/* Soft gradient wash */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${style.grad} opacity-[0.06] group-hover:opacity-[0.1] transition-opacity`}/>
-
-                  {/* Top gradient accent bar */}
+                  {/* Top accent bar */}
                   <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${style.grad}`}/>
-
-                  {/* Glow blob top right */}
+                  {/* Glow blobs */}
                   <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full bg-gradient-to-br ${style.grad} opacity-[0.12] blur-2xl group-hover:opacity-20 transition-opacity`}/>
-
-                  {/* Glow blob bottom left */}
                   <div className={`absolute -bottom-8 -left-8 w-20 h-20 rounded-full bg-gradient-to-tr ${style.grad} opacity-[0.08] blur-2xl`}/>
 
+                  {/* Avatar row */}
                   <div className="relative flex items-start justify-between mb-3 z-10">
                     <div className="relative">
+                      {/* Glow behind avatar */}
                       <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${style.grad} opacity-20 blur-md scale-110`}/>
-                      <Avatar name={fullName(emp)} src={emp.avatar} size="md"/>
+                      <EmpAvatar emp={emp} size="md" />
+                      {/* Dept icon badge */}
                       <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br ${style.grad} flex items-center justify-center ring-2 ring-white shadow-sm`}>
                         <Icon size={10} className="text-white"/>
                       </div>
@@ -228,6 +278,7 @@ export default function EmployeeList() {
             })}
           </div>
         ) : (
+          /* Table view */
           <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
             <table className="w-full text-xs">
               <thead>
@@ -245,11 +296,12 @@ export default function EmployeeList() {
                     <tr key={emp._id} onClick={() => navigate(`/core-hr/${emp._id}`)}
                       className="hover:bg-slate-50/80 cursor-pointer transition-colors group">
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="relative">
-                            <Avatar name={fullName(emp)} src={emp.avatar} size="sm"/>
-                            <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br ${style.grad} flex items-center justify-center ring-2 ring-white`}>
-                              <Icon size={7} className="text-white"/>
+                        <div className="flex items-center gap-3">
+                          {/* Larger avatar in table too */}
+                          <div className="relative flex-shrink-0">
+                            <EmpAvatar emp={emp} size="sm" />
+                            <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-gradient-to-br ${style.grad} flex items-center justify-center ring-2 ring-white`}>
+                              <Icon size={8} className="text-white"/>
                             </div>
                           </div>
                           <div>
