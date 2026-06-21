@@ -5,10 +5,14 @@ import Spinner from '@/components/ui/Spinner'
 import { departmentService } from '@/services/employeeService'
 import toast from 'react-hot-toast'
 
-const DEPT_COLORS = [
-  'bg-violet-100 text-violet-600','bg-blue-100 text-blue-600',
-  'bg-emerald-100 text-emerald-600','bg-amber-100 text-amber-600',
-  'bg-pink-100 text-pink-600','bg-cyan-100 text-cyan-600',
+// Gradient + icon-bg pairs cycled per card, lighter wash style matching EmployeeList
+const DEPT_STYLES = [
+  { grad:'from-violet-500 to-purple-400',  bg:'bg-violet-100',  text:'text-violet-600'  },
+  { grad:'from-blue-500 to-cyan-400',      bg:'bg-blue-100',    text:'text-blue-600'    },
+  { grad:'from-emerald-500 to-teal-400',   bg:'bg-emerald-100', text:'text-emerald-600' },
+  { grad:'from-amber-500 to-yellow-400',   bg:'bg-amber-100',   text:'text-amber-600'   },
+  { grad:'from-pink-500 to-rose-400',      bg:'bg-pink-100',    text:'text-pink-600'    },
+  { grad:'from-cyan-500 to-sky-400',       bg:'bg-cyan-100',    text:'text-cyan-600'    },
 ]
 
 const EMPTY_FORM = { name:'', code:'', businessUnit:'', costCenter:'' }
@@ -18,7 +22,7 @@ export default function DepartmentList() {
   const [loading, setLoading]     = useState(true)
   const [saving, setSaving]       = useState(false)
   const [modal, setModal]         = useState(false)
-  const [editTarget, setEditTarget] = useState(null) // dept being edited
+  const [editTarget, setEditTarget] = useState(null)
   const [form, setForm]           = useState(EMPTY_FORM)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
@@ -36,11 +40,7 @@ export default function DepartmentList() {
 
   useEffect(() => { fetchDepts() }, [])
 
-  const openAdd = () => {
-    setEditTarget(null)
-    setForm(EMPTY_FORM)
-    setModal(true)
-  }
+  const openAdd = () => { setEditTarget(null); setForm(EMPTY_FORM); setModal(true) }
 
   const openEdit = (dept) => {
     setEditTarget(dept)
@@ -101,14 +101,14 @@ export default function DepartmentList() {
             <RefreshCw size={13}/>
           </button>
           <button onClick={openAdd}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-md text-xs font-600 hover:bg-primary-dark transition-colors">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-primary to-emerald-400 text-white rounded-md text-xs font-600 hover:opacity-90 transition-all shadow-sm">
             <Plus size={13}/> Add Department
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-5">
+      <div className="flex-1 overflow-y-auto p-5 bg-gradient-to-b from-slate-50/50 to-transparent">
         {loading ? (
           <div className="flex items-center justify-center h-48"><Spinner size="lg"/></div>
         ) : departments.length === 0 ? (
@@ -117,48 +117,67 @@ export default function DepartmentList() {
             <button onClick={openAdd} className="mt-3 text-xs font-600 text-primary hover:underline">Add your first department</button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            {departments.map((d, i) => (
-              <div key={d._id} className="bg-white border border-border rounded-lg p-4 hover:shadow-card-hover transition-shadow">
-                <div className="flex items-start justify-between mb-3">
-                  <div className={`w-10 h-10 rounded-lg ${DEPT_COLORS[i % DEPT_COLORS.length]} flex items-center justify-center font-700 text-sm`}>
-                    {d.code?.slice(0,2) || d.name?.slice(0,2)}
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {departments.map((d, i) => {
+              const style = DEPT_STYLES[i % DEPT_STYLES.length]
+              return (
+                <div key={d._id}
+                  className="relative rounded-xl p-4 overflow-hidden border border-white/60 bg-white
+                    hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group">
+
+                  {/* Soft gradient wash */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${style.grad} opacity-[0.06] group-hover:opacity-[0.1] transition-opacity`}/>
+                  {/* Top accent bar */}
+                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${style.grad}`}/>
+                  {/* Glow blobs */}
+                  <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full bg-gradient-to-br ${style.grad} opacity-[0.12] blur-2xl group-hover:opacity-20 transition-opacity`}/>
+                  <div className={`absolute -bottom-8 -left-8 w-20 h-20 rounded-full bg-gradient-to-tr ${style.grad} opacity-[0.08] blur-2xl`}/>
+
+                  <div className="relative z-10 flex items-start justify-between mb-3">
+                    <div className="relative">
+                      <div className={`absolute inset-0 rounded-lg bg-gradient-to-br ${style.grad} opacity-25 blur-md scale-110`}/>
+                      <div className={`relative w-10 h-10 rounded-lg bg-gradient-to-br ${style.grad} flex items-center justify-center font-700 text-sm text-white shadow-sm`}>
+                        {d.code?.slice(0,2) || d.name?.slice(0,2)}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => openEdit(d)}
+                        className="w-6 h-6 rounded-md bg-white/70 backdrop-blur-sm border border-white hover:bg-white flex items-center justify-center text-text-muted hover:text-primary transition-colors">
+                        <Edit2 size={12}/>
+                      </button>
+                      <button onClick={() => setDeleteTarget(d)}
+                        className="w-6 h-6 rounded-md bg-white/70 backdrop-blur-sm border border-white hover:bg-red-50 flex items-center justify-center text-text-muted hover:text-red-500 transition-colors">
+                        <Trash2 size={12}/>
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-1">
-                    <button onClick={() => openEdit(d)}
-                      className="w-6 h-6 rounded-md hover:bg-slate-100 flex items-center justify-center text-text-muted hover:text-primary transition-colors">
-                      <Edit2 size={12}/>
-                    </button>
-                    <button onClick={() => setDeleteTarget(d)}
-                      className="w-6 h-6 rounded-md hover:bg-red-50 flex items-center justify-center text-text-muted hover:text-red-500 transition-colors">
-                      <Trash2 size={12}/>
-                    </button>
+
+                  <p className="relative z-10 text-sm font-700 text-text-primary">{d.name}</p>
+                  <p className="relative z-10 text-[10px] text-text-muted mb-2">Code: {d.code || '—'}</p>
+
+                  <div className="relative z-10 space-y-1.5 pt-2 border-t border-white/60">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-muted">Head</span>
+                      <span className="font-600 text-text-primary">
+                        {d.head ? `${d.head.firstName} ${d.head.lastName}` : '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-muted flex items-center gap-1"><Users size={10}/>Employees</span>
+                      <span className={`font-700 px-1.5 py-0.5 rounded-full ${style.bg} ${style.text}`}>{d.employeeCount ?? '—'}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-muted">Business Unit</span>
+                      <span className="font-600 text-text-primary">{d.businessUnit || '—'}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-muted">Cost Center</span>
+                      <span className="font-600 text-text-primary bg-white/70 backdrop-blur-sm px-1.5 py-0.5 rounded border border-white">{d.costCenter || '—'}</span>
+                    </div>
                   </div>
                 </div>
-                <p className="text-sm font-700 text-text-primary">{d.name}</p>
-                <p className="text-[10px] text-text-muted mb-2">Code: {d.code || '—'}</p>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-text-muted">Head</span>
-                    <span className="font-600 text-text-primary">
-                      {d.head ? `${d.head.firstName} ${d.head.lastName}` : '—'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-text-muted flex items-center gap-1"><Users size={10}/>Employees</span>
-                    <span className="font-600 text-text-primary">{d.employeeCount ?? '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-text-muted">Business Unit</span>
-                    <span className="font-600 text-text-primary">{d.businessUnit || '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-text-muted">Cost Center</span>
-                    <span className="font-600 text-text-primary">{d.costCenter || '—'}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

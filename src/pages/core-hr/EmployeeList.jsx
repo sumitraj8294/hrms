@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Plus, Download, MoreVertical, Mail, Phone, RefreshCw } from 'lucide-react'
+import {
+  Search, Plus, Download, MoreVertical, Mail, Phone, RefreshCw,
+  Code2, Palette, TrendingUp, Wallet, Headphones, Megaphone, Scale, Settings2,
+  MapPin, Calendar, Briefcase, Sparkles
+} from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import Badge from '@/components/ui/Badge'
 import Spinner from '@/components/ui/Spinner'
@@ -12,6 +16,24 @@ const STATUS_BADGE = {
   on_leave:  { label:'On Leave',  variant:'yellow' },
   probation: { label:'Probation', variant:'purple' },
   inactive:  { label:'Inactive',  variant:'gray'   },
+}
+
+// Department → icon + gradient mapping (matches by keyword, case-insensitive)
+const DEPT_STYLES = [
+  { match:/engineer|tech|dev/i,        icon:Code2,      grad:'from-blue-500 to-cyan-400',     bg:'bg-blue-50',    text:'text-blue-600'   },
+  { match:/design|ux|ui/i,             icon:Palette,    grad:'from-pink-500 to-rose-400',     bg:'bg-pink-50',    text:'text-pink-600'   },
+  { match:/sales|business/i,           icon:TrendingUp, grad:'from-emerald-500 to-teal-400',  bg:'bg-emerald-50', text:'text-emerald-600'},
+  { match:/finance|account/i,          icon:Wallet,     grad:'from-amber-500 to-yellow-400',  bg:'bg-amber-50',   text:'text-amber-600'  },
+  { match:/hr|human/i,                 icon:Headphones, grad:'from-violet-500 to-purple-400', bg:'bg-violet-50',  text:'text-violet-600' },
+  { match:/marketing/i,                icon:Megaphone,  grad:'from-orange-500 to-red-400',    bg:'bg-orange-50',  text:'text-orange-600' },
+  { match:/legal/i,                    icon:Scale,      grad:'from-slate-600 to-slate-400',   bg:'bg-slate-100',  text:'text-slate-600'  },
+  { match:/operation/i,                icon:Settings2,  grad:'from-indigo-500 to-blue-400',   bg:'bg-indigo-50',  text:'text-indigo-600' },
+]
+
+function getDeptStyle(deptName = '') {
+  return DEPT_STYLES.find(s => s.match.test(deptName)) || {
+    icon: Briefcase, grad:'from-slate-500 to-slate-400', bg:'bg-slate-100', text:'text-slate-600',
+  }
 }
 
 export default function EmployeeList() {
@@ -30,8 +52,8 @@ export default function EmployeeList() {
     setLoading(true)
     try {
       const params = { page, limit }
-      if (search)       params.search     = search
-      if (dept)         params.department = dept
+      if (search) params.search     = search
+      if (dept)   params.department = dept
       const res = await employeeService.getAll(params)
       setEmployees(res.data?.employees || [])
       setTotal(res.data?.total || 0)
@@ -42,27 +64,18 @@ export default function EmployeeList() {
     }
   }, [page, search, dept])
 
-  // fetch departments for filter chips
   useEffect(() => {
-    departmentService.getAll()
-      .then(res => setDepts(res.data || []))
-      .catch(() => {})
+    departmentService.getAll().then(res => setDepts(res.data || [])).catch(() => {})
   }, [])
 
-  // debounce search
   useEffect(() => {
     const t = setTimeout(() => { setPage(1); fetchEmployees() }, 400)
     return () => clearTimeout(t)
   }, [search])
 
-  // immediate fetch on dept/page change
   useEffect(() => { fetchEmployees() }, [dept, page])
 
-  const handleDeptFilter = (deptId) => {
-    setDept(deptId)
-    setPage(1)
-  }
-
+  const handleDeptFilter = (deptId) => { setDept(deptId); setPage(1) }
   const fullName = (emp) => `${emp.firstName} ${emp.lastName}`
 
   return (
@@ -82,7 +95,7 @@ export default function EmployeeList() {
           </button>
           <button
             onClick={() => navigate('/core-hr/add')}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-md text-xs font-600 hover:bg-primary-dark transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-primary to-emerald-400 text-white rounded-md text-xs font-600 hover:opacity-90 transition-all shadow-sm"
           >
             <Plus size={13}/> Add Employee
           </button>
@@ -101,19 +114,25 @@ export default function EmployeeList() {
           />
         </div>
 
-        {/* Dept filter chips from API */}
+        {/* Dept filter chips with icons */}
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => handleDeptFilter('')}
-            className={`px-2.5 py-1 rounded-full text-xs font-600 transition-colors ${!dept ? 'bg-primary text-white' : 'bg-slate-100 text-text-secondary hover:bg-slate-200'}`}>
-            All
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-600 transition-all ${!dept ? 'bg-gradient-to-r from-primary to-emerald-400 text-white shadow-sm' : 'bg-slate-100 text-text-secondary hover:bg-slate-200'}`}>
+            <Sparkles size={11}/> All
           </button>
-          {departments.map(d => (
-            <button key={d._id} onClick={() => handleDeptFilter(d._id)}
-              className={`px-2.5 py-1 rounded-full text-xs font-600 transition-colors ${dept === d._id ? 'bg-primary text-white' : 'bg-slate-100 text-text-secondary hover:bg-slate-200'}`}>
-              {d.name}
-            </button>
-          ))}
+          {departments.map(d => {
+            const style = getDeptStyle(d.name)
+            const Icon  = style.icon
+            const isActive = dept === d._id
+            return (
+              <button key={d._id} onClick={() => handleDeptFilter(d._id)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-600 transition-all
+                  ${isActive ? `bg-gradient-to-r ${style.grad} text-white shadow-sm` : 'bg-slate-100 text-text-secondary hover:bg-slate-200'}`}>
+                <Icon size={11}/> {d.name}
+              </button>
+            )
+          })}
         </div>
 
         <div className="ml-auto flex items-center gap-1 border border-border rounded-md overflow-hidden">
@@ -127,7 +146,7 @@ export default function EmployeeList() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-5">
+      <div className="flex-1 overflow-y-auto p-5 bg-gradient-to-b from-slate-50/50 to-transparent">
         {loading ? (
           <div className="flex items-center justify-center h-48">
             <Spinner size="lg"/>
@@ -139,75 +158,129 @@ export default function EmployeeList() {
             <p className="text-xs mt-1">Try a different search or department filter</p>
           </div>
         ) : view === 'grid' ? (
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {employees.map(emp => (
-              <div key={emp._id}
-                onClick={() => navigate(`/core-hr/${emp._id}`)}
-                className="bg-white border border-border rounded-lg p-4 cursor-pointer hover:shadow-card-hover hover:border-primary/30 transition-all group">
-                <div className="flex items-start justify-between mb-3">
-                  <Avatar name={fullName(emp)} src={emp.avatar} size="md"/>
-                  <Badge variant={STATUS_BADGE[emp.status]?.variant || 'gray'}>
-                    {STATUS_BADGE[emp.status]?.label || emp.status}
-                  </Badge>
-                </div>
-                <p className="text-sm font-700 text-text-primary group-hover:text-primary transition-colors">{fullName(emp)}</p>
-                <p className="text-xs text-text-secondary mt-0.5">{emp.designation?.name || '—'}</p>
-                <p className="text-[10px] text-text-muted mt-0.5">{emp.department?.name || '—'}</p>
-                <div className="mt-3 pt-3 border-t border-border space-y-1">
-                  <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
-                    <Mail size={10}/><span className="truncate">{emp.email}</span>
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {employees.map(emp => {
+              const style = getDeptStyle(emp.department?.name)
+              const Icon  = style.icon
+              return (
+                <div key={emp._id}
+                  onClick={() => navigate(`/core-hr/${emp._id}`)}
+                  className={`relative rounded-xl p-4 cursor-pointer overflow-hidden border border-white/60
+                    bg-gradient-to-br ${style.bg} via-white to-white
+                    hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group`}
+                  style={{ backgroundImage: `linear-gradient(135deg, var(--tw-gradient-stops))` }}
+                >
+
+                  {/* Soft gradient wash background */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${style.grad} opacity-[0.06] group-hover:opacity-[0.1] transition-opacity`}/>
+
+                  {/* Top gradient accent bar */}
+                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${style.grad}`}/>
+
+                  {/* Glow blob top right */}
+                  <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full bg-gradient-to-br ${style.grad} opacity-[0.12] blur-2xl group-hover:opacity-20 transition-opacity`}/>
+
+                  {/* Glow blob bottom left */}
+                  <div className={`absolute -bottom-8 -left-8 w-20 h-20 rounded-full bg-gradient-to-tr ${style.grad} opacity-[0.08] blur-2xl`}/>
+
+                  <div className="relative flex items-start justify-between mb-3 z-10">
+                    <div className="relative">
+                      <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${style.grad} opacity-20 blur-md scale-110`}/>
+                      <Avatar name={fullName(emp)} src={emp.avatar} size="md"/>
+                      <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br ${style.grad} flex items-center justify-center ring-2 ring-white shadow-sm`}>
+                        <Icon size={10} className="text-white"/>
+                      </div>
+                    </div>
+                    <Badge variant={STATUS_BADGE[emp.status]?.variant || 'gray'}>
+                      {STATUS_BADGE[emp.status]?.label || emp.status}
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
-                    <Phone size={10}/><span>{emp.phone || '—'}</span>
+
+                  <p className="relative z-10 text-sm font-700 text-text-primary group-hover:text-primary transition-colors">{fullName(emp)}</p>
+                  <p className="relative z-10 text-xs text-text-secondary mt-0.5">{emp.designation?.name || '—'}</p>
+
+                  <div className={`relative z-10 inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-white/70 backdrop-blur-sm border border-white shadow-sm`}>
+                    <Icon size={10} className={style.text}/>
+                    <span className={`text-[10px] font-600 ${style.text}`}>{emp.department?.name || 'Unassigned'}</span>
+                  </div>
+
+                  <div className="relative z-10 mt-3 pt-3 border-t border-white/60 space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
+                      <Mail size={10} className="flex-shrink-0"/><span className="truncate">{emp.email}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
+                      <Phone size={10} className="flex-shrink-0"/><span>{emp.phone || '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
+                      <MapPin size={10} className="flex-shrink-0"/><span>{emp.location || '—'}</span>
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 mt-2.5 pt-2.5 border-t border-white/60 flex items-center justify-between">
+                    <span className="text-[10px] font-600 text-text-muted bg-white/70 backdrop-blur-sm px-1.5 py-0.5 rounded border border-white">{emp.employeeId}</span>
+                    <div className="flex items-center gap-1 text-[10px] text-text-muted">
+                      <Calendar size={9}/>
+                      <span>{emp.joiningDate ? formatDate(emp.joiningDate) : '—'}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-[10px] text-text-muted">{emp.employeeId}</span>
-                  <span className="text-[10px] text-text-muted">{emp.location || '—'}</span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
-          <div className="bg-white border border-border rounded-lg overflow-hidden">
+          <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-border">
+                <tr className="bg-gradient-to-r from-slate-50 to-slate-100/50 border-b border-border">
                   {['Employee','Department','Designation','Location','Joining Date','Type','Status',''].map(h => (
-                    <th key={h} className="text-left px-4 py-2.5 text-[10px] font-700 text-text-muted uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-[10px] font-700 text-text-muted uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {employees.map(emp => (
-                  <tr key={emp._id} onClick={() => navigate(`/core-hr/${emp._id}`)}
-                    className="hover:bg-slate-50 cursor-pointer transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <Avatar name={fullName(emp)} src={emp.avatar} size="sm"/>
-                        <div>
-                          <p className="font-600 text-text-primary">{fullName(emp)}</p>
-                          <p className="text-text-muted">{emp.employeeId}</p>
+                {employees.map(emp => {
+                  const style = getDeptStyle(emp.department?.name)
+                  const Icon  = style.icon
+                  return (
+                    <tr key={emp._id} onClick={() => navigate(`/core-hr/${emp._id}`)}
+                      className="hover:bg-slate-50/80 cursor-pointer transition-colors group">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="relative">
+                            <Avatar name={fullName(emp)} src={emp.avatar} size="sm"/>
+                            <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br ${style.grad} flex items-center justify-center ring-2 ring-white`}>
+                              <Icon size={7} className="text-white"/>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="font-600 text-text-primary group-hover:text-primary transition-colors">{fullName(emp)}</p>
+                            <p className="text-text-muted">{emp.employeeId}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-text-secondary">{emp.department?.name || '—'}</td>
-                    <td className="px-4 py-3 text-text-secondary">{emp.designation?.name || '—'}</td>
-                    <td className="px-4 py-3 text-text-secondary">{emp.location || '—'}</td>
-                    <td className="px-4 py-3 text-text-secondary">{emp.joiningDate ? formatDate(emp.joiningDate) : '—'}</td>
-                    <td className="px-4 py-3 text-text-secondary">{emp.employmentType || '—'}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={STATUS_BADGE[emp.status]?.variant || 'gray'}>
-                        {STATUS_BADGE[emp.status]?.label || emp.status}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button onClick={e => e.stopPropagation()} className="text-text-muted hover:text-primary transition-colors">
-                        <MoreVertical size={14}/>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${style.bg}`}>
+                          <Icon size={10} className={style.text}/>
+                          <span className={`font-600 ${style.text}`}>{emp.department?.name || '—'}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary">{emp.designation?.name || '—'}</td>
+                      <td className="px-4 py-3 text-text-secondary">{emp.location || '—'}</td>
+                      <td className="px-4 py-3 text-text-secondary">{emp.joiningDate ? formatDate(emp.joiningDate) : '—'}</td>
+                      <td className="px-4 py-3 text-text-secondary">{emp.employmentType || '—'}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant={STATUS_BADGE[emp.status]?.variant || 'gray'}>
+                          {STATUS_BADGE[emp.status]?.label || emp.status}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button onClick={e => e.stopPropagation()} className="text-text-muted hover:text-primary transition-colors">
+                          <MoreVertical size={14}/>
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
